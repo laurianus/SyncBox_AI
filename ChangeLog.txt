@@ -1,0 +1,113 @@
+10.02.2026
+- reoslved bugs with swpa audio channels after multiple play stop
+Just add on stop 
+  
+void I2S3_FullReset(void)
+{
+    // Stop everything
+    DMA1_Stream7->CR &= ~DMA_SxCR_EN;
+    SPI3->I2SCFGR &= ~SPI_I2SCFGR_I2SE;
+    
+    // Reset I2S peripheral
+     
+    RCC->APB1RSTR |= RCC_APB1RSTR_SPI3RST;
+    for(volatile int i = 0; i < 100; i++); // Small delay
+    RCC->APB1RSTR &= ~RCC_APB1RSTR_SPI3RST;
+    
+    
+}
+
+07.02.2025
+- Add External trogger
+
+
+30.01.2025
+- Change Priorities on UART
+- Change SD Card Speeed
+
+13.11.2025
+- ADD DMX when Syncbox is Master (ID 10) Universe 210
+- ADD Time code generaor in test strt with music
+
+- ADD posibility to start Time code in Test state on connected SyncBox
+If you have an SyncBox connected you can generate time code in test. 
+From controller
+        Press Audio player and in Audio player use < or > to go in screen of Sync box you want to use to generate time codes and hold down Play button. For safety reasons to keep time code running must keep pressed play button for at leats 5 seconds otehrwise will stop when release
+Once it is continously started can be stopped by pressing play button again
+
+From Syncbox
+        In TEST hold down Knob button to start playing Time code. For safety reasons to keep time code running must keep pressed Knob button for at leats 5 seconds otehrwise will stop when release. Once it is continously started can be stopped by pressing knob button again
+
+- ADD offset when generate Time code on Syncbox and set offset from main controller. You can set a time code offset in controller Settings and generated time code would be add it the offset.
+
+
+
+08.09.2025
+- ADD Reset Audiobox if Audio file is not read it
+
+
+
+#define SD_DATATIMEOUT           ((uint32_t)100000)
+//#define SDMMC_DATATIMEOUT                  0xFFFFFFFFU
+
+
+27.06.2023
+- resolved Audioboxes Remote playing (Controller wireless messages)
+- Resolved Arming message remaining on screen
+
+14.02.2023
+- Change power off modules display
+
+24.01.2022
+- Resolved Sequence fire auto offset
+
+23.01.2022
+- Add power off remotely 
+
+20.01.2022
+- Add support for 433Mhz LORA
+
+26.10.2022
+- Add Wireless analyzer
+- Modify Wireless standard and custom menu
+- Display wireless channel
+
+15.10.2022
+- Modified MAX WAIT Time on wireles message at 50ms
+- Add Display Error if read music file from card or USB drive it is delayed
+
+10.10.2022
+- Add posibility to fire DMX sequence in Arm and Pause
+
+
+26.09.2022
+- Add posibility to adjust time even on time code start
+
+19.09.2022
+- Display which module is programmed and not on controller
+- Display Audioboxes number in the top right corner
+- Display E if wireless module does not respond
+- Refresh modules does not work corect - need to remove some more details about connnected modules
+
+16.09.2022
+- Add Menu Settings: Time, Wireless, Backlight
+- Add Different custom wirless network
+
+15.09.2022
+- Resolved bug where if a module does not respond in ARM may block the system
+- Add PING_OFFSET to be sent to all modules via MASTER_SLAVE_PingBC
+- Add signal_flag on controller - Display full signal except when a module did not respond or is disconnected
+
+14.09.2022
+- Add support for USB Device (DISABLED)
+- Change Error report on module screen - It shows what is the problem on main line
+- Resolved bug wit Audiobox coudl not be controller in TEST when you were in a module screen
+- Add cfgResp2="ATS0E=14C0" in Wireless config to disable Prompt of NACK and others
+
+12.08.2022
+- Disable posibility to go in Play if Manual fire is activated
+- Add posibility to Hold Manual fire button for another function: The code was commented in this version
+
+09.07.2022
+- Add charge when is powered on using read ADC Vbus voltage - VBUS pins does not work because of the wrong resistor (2K2 instead of 10K)
+

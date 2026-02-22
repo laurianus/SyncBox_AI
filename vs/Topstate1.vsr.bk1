@@ -1,0 +1,524 @@
+@visualSTATE @RuleBase @Format3 "NoName"
+
+@Directives
+
+  @visualSTATE 6-3-2-1841;
+  @Date 2020-01-04;
+  @Time 00:01:56;
+
+
+
+@Declaration
+
+  @ActionFunction
+    VS_VOID ARM_DMX(),
+    VS_VOID Audio_Pause(),
+    VS_VOID Audio_Play_Pause_Idle(),
+    VS_VOID Audio_Play_Resume(),
+    VS_VOID Audio_Stop(),
+    VS_VOID DELAY_STAT_MSG(),
+    VS_VOID DISABLE_PWR_BUTTON(),
+    VS_VOID Dev_Valid_Timer_Rst(),
+    VS_VOID Dev_Valid_Timer_Set(),
+    VS_VOID ENABLE_PWR_BUTTON(),
+    VS_VOID RESET_PING_TIMER(),
+    VS_VOID RST_ARM_DMX(),
+    VS_VOID RST_DEV_Time(),
+    VS_VOID RST_DMX_Timer(),
+    VS_VOID STOP_TIMECODE(),
+    VS_VOID Set_crit_errA(),
+    VS_VOID State_update(),
+    VS_VOID TimeCode_Gen_start(),
+    VS_VOID TimeCode_Gen_stop(),
+    VS_VOID Vol_Down(),
+    VS_VOID Vol_Up(),
+    VS_VOID clearPWEN(),
+    VS_VOID reset_DMX_Buf(),
+    VS_VOID rst_Last_Fired(),
+    VS_VOID sendMSPause(),
+    VS_VOID sendMSPowerDisable(),
+    VS_VOID sendMSPowerEnable(),
+    VS_VOID sendMSStart(),
+    VS_VOID sendMSStop(),
+    VS_VOID sendSMStatusInterface(),
+    VS_VOID send_433_start_Master_msg(),
+    VS_VOID setJoinStatus(),
+    VS_VOID setPWEN(),
+    VS_VOID set_refresh_lcdAC();
+
+
+@Definition
+
+  @Constant
+    VS_INT Master_Device = 2,
+    VS_INT RepeatLimit = 1,
+    VS_INT Self_Device = 3,
+    VS_INT Slave_Device = 1,
+    VS_INT Status_Create = 1,
+    VS_INT Status_Error = 9,
+    VS_INT Status_Idle = 2,
+    VS_INT Status_Init = 0,
+    VS_INT Status_Manual = 6,
+    VS_INT Status_Pause = 5,
+    VS_INT Status_Play = 4,
+    VS_INT Status_PowerEnable = 3,
+    VS_INT Unknown_Device = 0;
+
+  @Event
+    ev_Arm(),
+    ev_BB_Long_Press(),
+    ev_BB_Short_Press(),
+    ev_Disarm(),
+    ev_GB_Long_Press(),
+    ev_GB_Short_Press(),
+    ev_GB_Short_PressX(),
+    ev_MS_Ping(),
+    ev_MS_ToMaster(),
+    ev_MS_ToTEST(),
+    ev_NetworkJoin(),
+    ev_Pause(),
+    ev_Resume(),
+    ev_SMPTEstart(),
+    ev_SMPTEstartP(),
+    ev_Start(),
+    ev_Stop(),
+    ev_SyncMsg();
+
+  @ExternalVariable
+    VS_INT device_Kind = { 0 },
+    VS_INT device_Status = { 0 };
+
+
+@Implementation
+
+  @StateMachine StateMachineSpec_8 =
+
+    @State
+      State1
+        [[ Pos440 = "350 100 530 143 16 1 1638401" ]];
+
+    @StateRegion
+      Region1 (State1)
+        [[ Pos440 = "0 0 597 155" ]];
+
+    @Entry
+      #RST_DMX_Timer() #Dev_Valid_Timer_Rst() [|device_Status = Status_Pause|];
+
+    @Exit;
+
+    @Do;
+
+    @InternalRule;
+
+    @TransitionRule;
+
+    @TerminationRule;
+
+  @End;
+
+  @StateMachine StateMachineSpec_7 =
+
+    @State
+      State1
+        [[ Pos440 = "1091 101 1278 150 16 1 1638401" ]];
+
+    @StateRegion
+      Region1 (State1)
+        [[ Pos440 = "0 0 532 151" ]];
+
+    @Entry
+      #RST_DMX_Timer() #TimeCode_Gen_start() #Dev_Valid_Timer_Set() 
+      [|device_Status = Status_Play|];
+
+    @Exit
+      #TimeCode_Gen_stop();
+
+    @Do;
+
+    @InternalRule;
+
+    @TransitionRule;
+
+    @TerminationRule;
+
+  @End;
+
+  @StateMachine StateMachineSpec_6 =
+
+    @State
+      State1
+        [[ Pos440 = "1092 401 1241 444 16 1 1638401" ]];
+
+    @StateRegion
+      Region1 (State1)
+        [[ Pos440 = "0 0 537 147" ]];
+
+    @Entry
+      #STOP_TIMECODE() #ARM_DMX() #RST_DMX_Timer() #DISABLE_PWR_BUTTON()
+       #setPWEN() [|device_Status = Status_PowerEnable|];
+
+    @Exit;
+
+    @Do;
+
+    @InternalRule;
+
+    @TransitionRule;
+
+    @TerminationRule;
+
+  @End;
+
+  @StateMachine StateMachineSpec_5 =
+
+    @State
+      State1
+        [[ Pos440 = "227 431 518 493 16 1 1638401" ]];
+
+    @StateRegion
+      Region1 (State1)
+        [[ Pos440 = "0 0 510 169" ]];
+
+    @Entry
+      #reset_DMX_Buf() #RST_ARM_DMX() #ENABLE_PWR_BUTTON() #RST_DEV_Time()
+       #clearPWEN() [|device_Status = Status_Idle|] 
+      [|device_Kind = Master_Device|];
+
+    @Exit;
+
+    @Do;
+
+    @InternalRule;
+
+    @TransitionRule
+      ev_BB_Short_Press() @Src State1 : @Dest State1 #Audio_Stop()
+        [[ Pos440 = "165 381 245 411 1 809894017 8 0 245 411 28 0" ]],
+      ev_GB_Short_Press() @Src State1 : @Dest State1 #Audio_Play_Pause_Idle()
+        [[ Pos440 = "293 381 373 411 1 809894017 136 0 373 411 156 0" ]];
+
+    @TerminationRule;
+
+  @End;
+
+  @StateMachine StateMachineSpec_4 =
+
+    @State
+      PauseMainState
+        [[ Pos440 = "914 1086 1332 1146 16 1 1638401" ]],
+      @Initial _InitialState5
+        [[ Pos440 = "877 1038 897 1058 114689" ]];
+
+    @StateRegion
+      Region1 (PauseMainState, _InitialState5)
+        [[ Pos440 = "0 0 539 226" ]];
+
+    @Entry
+      #RST_DMX_Timer() #Dev_Valid_Timer_Rst() [|device_Status = Status_Pause|]
+       #Audio_Pause();
+
+    @Exit;
+
+    @Do;
+
+    @InternalRule;
+
+    @TransitionRule
+      ev_MS_Ping() @Src PauseMainState : @Dest PauseMainState
+         #sendSMStatusInterface()
+        [[ Pos440 = "1321 1034 1401 1064 1 809894017 368 0 1310 1047 393 0" ]],
+      ev_BB_Long_Press() @Src PauseMainState : @Dest PauseMainState #Vol_Down()
+        [[ Pos440 = "909 1036 989 1066 1 809894017 65 0 989 1066 85 0" ]],
+      ev_GB_Long_Press() @Src PauseMainState : @Dest PauseMainState #Vol_Up()
+        [[ Pos440 = "1004 1023 1084 1053 1 809894017 125 0 1049 1066 145 0" ]],
+      @NoEvent @Src _InitialState5 : @Dest PauseMainState
+        [[ Pos440 = "897 1017 927 1032 0 809894016 20 9 0 17" ]];
+
+    @TerminationRule;
+
+  @End;
+
+  @StateMachine StateMachineSpec_3 =
+
+    @State
+      PlayMainState
+        [[ Pos440 = "933 1453 1304 1566 16 1 1638401" ]],
+      @Initial _InitialState4
+        [[ Pos440 = "875 1559 895 1579 114689" ]];
+
+    @StateRegion
+      Region1 (PlayMainState, _InitialState4)
+        [[ Pos440 = "0 0 549 283" ]];
+
+    @Entry
+      #RST_DMX_Timer() #DISABLE_PWR_BUTTON() #TimeCode_Gen_start()
+       #Dev_Valid_Timer_Set() [|device_Status = Status_Play|];
+
+    @Exit
+      #TimeCode_Gen_stop();
+
+    @Do;
+
+    @InternalRule;
+
+    @TransitionRule
+      ev_MS_Ping() @Src PlayMainState : @Dest PlayMainState
+         #sendSMStatusInterface()
+        [[ Pos440 = "1115 1594 1195 1624 1 809894017 216 113 1115 1594 163 113"
+            ]],
+      ev_BB_Long_Press() @Src PlayMainState : @Dest PlayMainState #Vol_Down()
+        [[ Pos440 = "884 1403 964 1433 1 809894017 21 0 964 1433 41 0" ]],
+      ev_GB_Long_Press() @Src PlayMainState : @Dest PlayMainState #Vol_Up()
+        [[ Pos440 = "1003 1400 1083 1430 1 809894017 95 0 1038 1433 115 0" ]],
+      @NoEvent @Src _InitialState4 : @Dest PlayMainState
+        [[ Pos440 = "895 1538 925 1553 0 809894016 20 9 0 32" ]];
+
+    @TerminationRule;
+
+  @End;
+
+  @StateMachine StateMachineSpec_2 =
+
+    @State
+      ArmMainState
+        [[ Pos440 = "192 1486 604 1580 16 1 1638401" ]],
+      @Initial _InitialState3
+        [[ Pos440 = "139 1568 159 1588 114689" ]];
+
+    @StateRegion
+      Region1 (ArmMainState, _InitialState3)
+        [[ Pos440 = "0 0 543 228" ]];
+
+    @Entry
+      #STOP_TIMECODE() #ARM_DMX() #RST_DMX_Timer() #DISABLE_PWR_BUTTON()
+       #setPWEN() [|device_Status = Status_PowerEnable|];
+
+    @Exit;
+
+    @Do;
+
+    @InternalRule;
+
+    @TransitionRule
+      ev_MS_Ping() @Src ArmMainState : @Dest ArmMainState
+         #sendSMStatusInterface()
+        [[ Pos440 = "581 1413 661 1443 1 809894017 346 0 583 1437 383 0" ]],
+      ev_BB_Long_Press() @Src ArmMainState : @Dest ArmMainState #Vol_Down()
+        [[ Pos440 = "181 1436 261 1466 1 809894017 59 0 261 1466 79 0" ]],
+      ev_GB_Long_Press() @Src ArmMainState : @Dest ArmMainState #Vol_Up()
+        [[ Pos440 = "298 1435 378 1465 1 809894017 150 0 352 1466 170 0" ]],
+      @NoEvent @Src _InitialState3 : @Dest ArmMainState
+        [[ Pos440 = "159 1547 189 1562 0 809894016 20 9 0 27" ]];
+
+    @TerminationRule;
+
+  @End;
+
+  @StateMachine StateMachineSpec_1 =
+
+    @State
+      TestMainState
+        [[ Pos440 = "176 1107 548 1167 16 1 1638401" ]],
+      @Initial _InitialState2
+        [[ Pos440 = "140 1023 160 1043 114689" ]];
+
+    @StateRegion
+      Region1 (TestMainState, _InitialState2)
+        [[ Pos440 = "0 0 534 246" ]];
+
+    @Entry
+      #reset_DMX_Buf() #RST_ARM_DMX() #ENABLE_PWR_BUTTON() #RST_DEV_Time()
+       #clearPWEN() [|device_Kind = Slave_Device|] 
+      [|device_Status = Status_Idle|];
+
+    @Exit;
+
+    @Do;
+
+    @InternalRule;
+
+    @TransitionRule
+      ev_GB_Long_Press() @Src TestMainState : @Dest TestMainState #Vol_Up()
+        [[ Pos440 = "189 1051 269 1081 1 809894017 63 0 249 1087 83 0" ]],
+      ev_BB_Long_Press() @Src TestMainState : @Dest TestMainState #Vol_Down()
+        [[ Pos440 = "274 1051 354 1081 1 809894017 135 0 321 1087 155 0" ]],
+      ev_GB_Short_Press() @Src TestMainState : @Dest TestMainState
+         #Audio_Play_Pause_Idle() #DELAY_STAT_MSG()
+        [[ Pos440 = "353 1053 433 1083 1 809894017 195 0 381 1087 215 0" ]],
+      ev_BB_Short_Press() @Src TestMainState : @Dest TestMainState #Audio_Stop()
+         #DELAY_STAT_MSG()
+        [[ Pos440 = "448 1045 528 1075 1 809894017 274 0 460 1087 294 0" ]],
+      @NoEvent @Src _InitialState2 : @Dest TestMainState
+        [[ Pos440 = "160 1002 190 1017 0 809894016 20 9 13 0" ]];
+
+    @TerminationRule;
+
+  @End;
+
+  @StateMachine StateMachineSpec_0 =
+
+    @State
+      PlayMainState
+        [[ Pos440 = "142 695 579 769 16 1 1638401" ]],
+      @Initial _InitialState0
+        [[ Pos440 = "131 657 151 677 114689" ]];
+
+    @StateRegion
+      Region1 (PlayMainState, _InitialState0)
+        [[ Pos440 = "0 0 531 234" ]];
+
+    @Entry
+      #RST_DEV_Time();
+
+    @Exit;
+
+    @Do;
+
+    @InternalRule;
+
+    @TransitionRule
+      ev_BB_Long_Press() @Src PlayMainState : @Dest PlayMainState #Vol_Down()
+        [[ Pos440 = "167 641 247 671 1 809894017 68 0 220 675 88 0" ]],
+      ev_GB_Long_Press() @Src PlayMainState : @Dest PlayMainState #Vol_Up()
+        [[ Pos440 = "296 639 376 669 1 809894017 191 0 343 675 211 0" ]],
+      ev_BB_Short_Press() @Src PlayMainState : @Dest PlayMainState #Audio_Stop()
+        [[ Pos440 = "402 624 482 654 1 809894017 278 0 430 675 298 0" ]],
+      ev_GB_Short_Press() @Src PlayMainState : @Dest PlayMainState
+         #Audio_Play_Pause_Idle()
+        [[ Pos440 = "509 640 589 670 1 809894017 379 0 531 675 399 0" ]],
+      @NoEvent @Src _InitialState0 : @Dest PlayMainState
+        [[ Pos440 = "151 636 181 651 0 809894016 20 9 11 0" ]];
+
+    @TerminationRule;
+
+  @End;
+
+  @TopStateMachine InterfaceTopState =
+
+    @State
+      InitState = StateMachineSpec_0
+        [[ Pos440 = "108 583 639 844 27 1 114689" ]],
+      @Initial _InitialState1
+        [[ Pos440 = "24 723 45 744 114689" ]],
+      S_IdleState = StateMachineSpec_1
+        [[ Pos440 = "108 962 642 1237 29 1 1687553" ]],
+      S_PowerState = StateMachineSpec_2
+        [[ Pos440 = "106 1347 649 1622 47 1 1687553" ]],
+      S_PlayState = StateMachineSpec_3
+        [[ Pos440 = "835 1337 1384 1655 35 1 1687553" ]],
+      S_PauseState = StateMachineSpec_4
+        [[ Pos440 = "841 965 1380 1230 39 1 1687553" ]],
+      TestState = StateMachineSpec_5
+        [[ Pos440 = "120 336 630 521 16 1 114689" ]],
+      ArmState = StateMachineSpec_6
+        [[ Pos440 = "887 339 1424 502 16 1 114689" ]],
+      PlayState = StateMachineSpec_7
+        [[ Pos440 = "915 42 1447 209 16 1 114689" ]],
+      PauseState = StateMachineSpec_8
+        [[ Pos440 = "92 24 689 195 16 1 114689" ]];
+
+    @StateRegion
+      @OffPage Control (InitState, _InitialState1, S_IdleState, S_PowerState, 
+      S_PlayState, S_PauseState, TestState, ArmState, PlayState, PauseState)
+        [[ Pos440 = "0 0 400 96", TextDisplayNote = "Preserve", 
+           TextDisplayState = "Preserve", TextDisplayTransDesc = "Preserve", 
+           View = "2 2 7" ]],
+      @OffPage GetSlaveStatus
+        [[ Pos440 = "0 1 400 54", TextDisplayNote = "Preserve", 
+           TextDisplayState = "Preserve", TextDisplayTransDesc = "Preserve", 
+           View = "2 2 7" ]];
+
+    @Entry;
+
+    @Exit;
+
+    @Do;
+
+    @InternalRule;
+
+    @TransitionRule
+      ev_NetworkJoin() @Src InitState.PlayMainState : @Dest S_IdleState
+         #sendSMStatusInterface()
+        [[ Pos440 = "371 860 451 890 0 809894016 220 74 258 0" ]],
+      ev_SyncMsg() @Src InitState.PlayMainState : @Dest S_PlayState
+         #Audio_Play_Resume() #sendSMStatusInterface()
+        [[ Pos440 = "1418 681 1498 711 1 809894018 437 27 1509 945 549 72" ]],
+      ev_MS_ToMaster() @Src InitState.PlayMainState : @Dest TestState
+        [[ Pos440 = "267 532 347 562 0 809894016 139 0 156 185" ]],
+      @NoEvent @Src _InitialState1 : @Dest InitState
+        [[ Pos440 = "49 704 90 720 0 809894016 21 9 0 149" ]],
+      ev_Arm() @Src S_IdleState.TestMainState : @Dest S_PowerState 
+        [|device_Status = Status_PowerEnable|] #Audio_Stop()
+         #sendSMStatusInterface()
+        [[ Pos440 = "288 1295 368 1325 0 809894016 116 60 259 0" ]],
+      ev_SyncMsg() @Src S_IdleState.TestMainState : @Dest S_PlayState
+         #Audio_Play_Resume() #sendSMStatusInterface()
+        [[ Pos440 = "705 1135 785 1165 1 809894018 372 33 792 1268 869 1295 36 0"
+            ]],
+      ev_MS_ToTEST() @Src S_PowerState : @Dest S_IdleState
+         #sendSMStatusInterface()
+        [[ Pos440 = "463 1278 543 1308 0 809894016 359 0 362 275" ]],
+      ev_Start() @Src S_PowerState.ArmMainState : @Dest S_PlayState
+         #Audio_Play_Resume() #sendSMStatusInterface()
+        [[ Pos440 = "687 1492 767 1522 0 809894016 412 29 0 190" ]],
+      ev_SyncMsg() @Src S_PowerState.ArmMainState : @Dest S_PlayState
+         #Audio_Play_Resume() #sendSMStatusInterface()
+        [[ Pos440 = "682 1585 762 1615 0 809894016 412 74 0 256" ]],
+      ev_Disarm() @Src S_PowerState.ArmMainState : @Dest S_IdleState
+         #sendSMStatusInterface()
+        [[ Pos440 = "111 1269 191 1299 0 809894016 12 0 74 275" ]],
+      ev_GB_Short_PressX() @Src S_PowerState.ArmMainState : @Dest S_PlayState
+         #send_433_start_Master_msg() #Audio_Play_Resume()
+        [[ Pos440 = "504 1651 584 1681 1 809894018 328 94 584 1651 0 310" ]],
+      ev_MS_ToTEST() @Src S_PlayState : @Dest S_IdleState #Audio_Stop()
+        [[ Pos440 = "723 1372 803 1402 1 809894018 0 87 723 1402 534 234" ]],
+      ev_Pause() @Src S_PlayState.PlayMainState : @Dest S_PauseState
+         #sendSMStatusInterface()
+        [[ Pos440 = "1289 1275 1369 1305 0 809894016 326 0 482 265" ]],
+      ev_MS_ToTEST() @Src S_PauseState : @Dest S_IdleState #Audio_Stop()
+        [[ Pos440 = "706 1004 786 1034 0 809894016 0 66 534 70" ]],
+      ev_Start() @Src S_PauseState.PauseMainState : @Dest S_PlayState
+         #Audio_Play_Resume() #sendSMStatusInterface()
+        [[ Pos440 = "921 1193 1001 1223 0 809894016 78 60 160 0" ]],
+      ev_SyncMsg() @Src S_PauseState.PauseMainState : @Dest S_PlayState
+         #Audio_Play_Resume() #sendSMStatusInterface()
+        [[ Pos440 = "1028 1255 1108 1285 0 809894016 113 60 192 0" ]],
+      ev_Stop() @Src S_PauseState.PauseMainState : @Dest S_IdleState
+         #Audio_Stop()
+        [[ Pos440 = "742 1079 822 1109 0 809894016 0 38 534 105" ]],
+      ev_GB_Long_Press() @Src TestState.State1 : @Dest ArmState
+         #sendMSPowerEnable() #Audio_Stop()
+        [[ Pos440 = "709 407 840 437 0 809894016 291 29 0 81" ]],
+      ev_GB_Short_Press() @Src ArmState.State1 : @Dest PlayState #sendMSStart()
+         #Audio_Play_Resume()
+        [[ Pos440 = "1046 280 1170 310 0 809894016 36 0 225 167" ]],
+      ev_BB_Long_Press() @Src ArmState.State1 : @Dest TestState
+         #sendMSPowerDisable()
+        [[ Pos440 = "689 475 842 505 0 809894016 0 37 510 142" ]],
+      ev_SMPTEstart() @Src ArmState.State1 : @Dest PlayState #sendMSStart()
+         #Audio_Play_Resume()
+        [[ Pos440 = "1210 262 1290 292 0 809894016 126 0 316 167" ]],
+      ev_GB_Short_Press() @Src PlayState.State1 : @Dest PauseState
+         #sendMSPause() #Audio_Pause()
+        [[ Pos440 = "907 100 1048 130 0 809894016 0 21 597 78" ]],
+      ev_BB_Short_Press() @Src PlayState.State1 : @Dest PauseState
+         #sendMSPause() #Audio_Pause()
+        [[ Pos440 = "1044 143 1124 173 0 809894016 0 41 597 94" ]],
+      ev_Pause() @Src PlayState.State1 : @Dest PauseState #sendMSPause()
+         #Audio_Pause()
+        [[ Pos440 = "768 42 848 72 0 809894016 0 9 597 45" ]],
+      ev_BB_Long_Press() @Src PauseState.State1 : @Dest TestState #sendMSStop()
+         #Audio_Stop()
+        [[ Pos440 = "371 238 451 268 0 809894016 91 43 315 0" ]],
+      ev_GB_Short_Press() @Src PauseState.State1 : @Dest PlayState
+         #sendMSStart() #Audio_Play_Resume()
+        [[ Pos440 = "478 84 625 114 0 809894016 180 20 0 103" ]],
+      ev_SMPTEstart() @Src PauseState.State1 : @Dest PlayState #sendMSStart()
+         #Audio_Play_Resume()
+        [[ Pos440 = "628 148 708 178 0 809894016 180 37 0 131" ]];
+
+    @TerminationRule;
+
+    [[ Pos440 = "80 20 480 186 16 1 114689" ]]
+
+  @End;
+

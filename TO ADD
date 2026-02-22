@@ -1,0 +1,291 @@
+TO ADD
+
+- Check if Audio1, 2 3 4 and 5 are on the disk form begening... not to stop the music if tehy are not when fire a new sequence
+- If Audiofiel exists to blink the 01 in the Sequnece screen
+- To be able to test Sequence files with 01, 0x
+
+- MULTIPLE AUDIOBOXES 
+- CHANGE HOW AN AUDIOBOX REPLY TO SYNC... only first AB to send back syncmessage with updated time
+
+- Read temperature and humidity
+- To Display time until start on controller, Also ask to Arm when are 3 minutes before
+- Add Sleep on wireless Menu
+- Possibility to see multiple Audiobox... all on channel 99 but to have displyed as last 4 digit of mac address (PARTIAL)
+
+- After a firmware update just write a first screen where the user agree with some things as WILL TEST and We are not responsabile for what it may happen
+
+- Wireless Reset/Learn must be a single menu and show based on the wireless module status
+
+- Display on controller what network it is: Custom, Standard and name
+
+
+21.09.2022
+- Be sure pingss in not sent after Wireless learn started
+- Testing sending broadcast messages to see if wireless buffer or send messages is increasing
+
+19.09.2022
+- If wireless does not comunicate display E on the controller wireless icon
+- If the Time code is not read or errors in Play the > to disappear
+- Does not Display Duplicate ID error
+
+18.09.2022
+- SHow "Saving, Please wait after save something"
+- Display which module is programmed and not on controller
+- Display Audiobox with background green even are errors
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//M+
+#define MP_BUT_PORT GPIOG
+#define MP_BUT_PIN GPIO_PIN_1
+#define MP_BUT_POS 0
+
+//M-
+#define MM_BUT_PORT GPIOB
+#define MM_BUT_PIN GPIO_PIN_0
+#define MM_BUT_POS 1
+
+
+//SCRIPT
+#define SCRIPT_BUT_PORT GPIOC
+#define SCRIPT_BUT_PIN GPIO_PIN_3
+#define SCRIPT_POS 2
+
+
+//R4
+#define R4_BUT_PORT GPIOB
+#define R4_BUT_PIN GPIO_PIN_1
+#define R4_POS 3
+
+
+//R3
+#define R3_BUT_PORT GPIOF
+#define R3_BUT_PIN GPIO_PIN_4
+#define R3_POS 4
+
+//R2
+#define R2_BUT_PORT GPIOE
+#define R2_BUT_PIN GPIO_PIN_4
+#define R2_POS 5
+
+
+//R1
+#define R1_BUT_PORT GPIOE
+#define R1_BUT_PIN GPIO_PIN_1
+#define R1_POS 6
+
+
+
+
+
+//L01
+#define L01_BUT_PORT GPIOE
+#define L01_BUT_PIN GPIO_PIN_0
+#define L01_POS 7
+
+
+//L05
+#define L05_BUT_PORT GPIOE
+#define L05_BUT_PIN GPIO_PIN_5
+#define L05_POS 8
+
+
+//L09
+#define L09_BUT_PORT GPIOF
+#define L09_BUT_PIN GPIO_PIN_5
+#define L09_POS 9
+
+
+//L13
+/*v1.4
+#define L13_BUT_PORT GPIOB
+#define L13_BUT_PIN GPIO_PIN_2
+#define L13_POS 10
+*/
+
+//v1.5
+#define L13_BUT_PORT GPIOC
+#define L13_BUT_PIN GPIO_PIN_4
+#define L13_POS 10
+
+
+
+//L14
+#define L14_BUT_PORT GPIOF
+#define L14_BUT_PIN GPIO_PIN_11
+#define L14_POS 11
+
+//L10
+#define L10_BUT_PORT GPIOF
+#define L10_BUT_PIN GPIO_PIN_9
+#define L10_POS 12
+
+//L06
+#define L06_BUT_PORT GPIOF
+#define L06_BUT_PIN GPIO_PIN_0
+#define L06_POS 13
+
+
+
+//L02 - moved to Hw Version
+/*
+#define L02_BUT_PORT GPIOB
+#define L02_BUT_PIN GPIO_PIN_7
+#define L02_POS 14
+*/
+
+//SHORTCUT
+/*
+//v1.7
+#define SHORT_BUT_PORT GPIOG
+#define SHORT_BUT_PIN GPIO_PIN_15
+#define SHORT_POS 15
+*/
+
+//v1.8
+#define SHORT_BUT_PORT GPIOG
+#define SHORT_BUT_PIN GPIO_PIN_13
+#define SHORT_POS 15
+
+
+
+//AUDIO PLAYER
+/* v1.4
+#define AP_BUT_PORT GPIOG
+#define AP_BUT_PIN GPIO_PIN_11
+#define AP_POS 16
+*/
+//v1.5
+/*
+#define AP_BUT_PORT GPIOB
+#define AP_BUT_PIN GPIO_PIN_4
+#define AP_POS 16
+*/
+
+//v1.5
+#define AP_BUT_PORT GPIOG
+#define AP_BUT_PIN GPIO_PIN_14
+#define AP_POS 16
+
+//SETTINGS
+//v1.5
+/*
+#define SET_BUT_PORT GPIOG
+#define SET_BUT_PIN GPIO_PIN_12
+#define SET_POS 17
+*/
+
+//v1.8
+#define SET_BUT_PORT GPIOG
+#define SET_BUT_PIN GPIO_PIN_10
+#define SET_POS 17
+
+
+//SAFETY ZONES
+//v1.7
+/*
+#define SZ_BUT_PORT GPIOG
+#define SZ_BUT_PIN GPIO_PIN_13
+#define SZ_POS 18
+*/
+
+//v1.8
+#define SZ_BUT_PORT GPIOG
+#define SZ_BUT_PIN GPIO_PIN_11
+#define SZ_POS 18
+
+
+//L03
+/*
+v1.5
+#define L03_BUT_PORT GPIOG
+#define L03_BUT_PIN GPIO_PIN_14
+#define L03_POS 19
+*/
+
+//v1.8
+#define L03_BUT_PORT GPIOG
+#define L03_BUT_PIN GPIO_PIN_12
+#define L03_POS 19
+
+//L07
+#define L07_BUT_PORT GPIOF
+#define L07_BUT_PIN GPIO_PIN_1
+#define L07_POS 20
+
+
+
+//L11
+#define L11_BUT_PORT GPIOF
+#define L11_BUT_PIN GPIO_PIN_10
+#define L11_POS 21
+
+//L15
+#define L15_BUT_PORT GPIOF
+#define L15_BUT_PIN GPIO_PIN_12
+#define L15_POS 22
+
+
+//L16
+#define L16_BUT_PORT GPIOF
+#define L16_BUT_PIN GPIO_PIN_13
+#define L16_POS 23
+
+//L12
+#define L12_BUT_PORT GPIOC
+#define L12_BUT_PIN GPIO_PIN_0
+#define L12_POS 24
+
+
+//L08
+#define L08_BUT_PORT GPIOF
+#define L08_BUT_PIN GPIO_PIN_2
+#define L08_POS 25
+
+//L04
+#define L04_BUT_PORT GPIOG
+#define L04_BUT_PIN GPIO_PIN_9
+#define L04_POS 26
+
+
+
+//SEQUENCE FIRE
+#define SQ_BUT_PORT GPIOD
+#define SQ_BUT_PIN GPIO_PIN_7
+#define SQ_POS 27
+
+
+
+//MANUAL FIRE
+#define MF_BUT_PORT GPIOF
+#define MF_BUT_PIN GPIO_PIN_3
+#define MF_POS 28
+
+
+//START
+#define START_BUT_PORT GPIOC
+#define START_BUT_PIN GPIO_PIN_1
+#define START_POS 29
+
+//STEP
+#define STEP_BUT_PORT GPIOF
+#define STEP_BUT_PIN GPIO_PIN_14
+#define STEP_POS 30
+
+ 
+
+

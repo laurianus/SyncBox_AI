@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<NavigatorWorkspace Date="2020-01-04" Explanation="" Time="00:01:31">
+
+  <SourceControl SccAuxPath="" SccName="" SccPath="." SccProvider=""/>
+
+  <Project Active="true" ActiveSystem="System1" File=".\System.vsp">
+    <Signature CheckSum="2fed 78e7 33cb 4e96 1f0e 8743" Version="50"/>
+    <OSEK APIType="0" ConfigApp="" Enabled="false" OILFile=""/>
+    <Report Creator="0" File="..\ew\vssrc\vscoder.cre"/>
+  </Project>
+
+</NavigatorWorkspace>

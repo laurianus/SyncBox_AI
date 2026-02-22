@@ -1,0 +1,6 @@
+--c99 -c --cpu Cortex-M4.fp.sp -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I ..\Include -I ..\Libraries\Drivers\CMSIS\Device\ST\STM32F4xx\Include -I ..\Libraries\Drivers\STM32F4xx_HAL_Driver\Inc -I ..\Libraries\Drivers\BSP\STM32F4-Discovery -I ..\Libraries\STM32_USB_Host_Library\Class\MSC\Inc -I ..\Libraries\STM32_USB_Host_Library\Core\Inc -I ..\Libraries\FatFs\src -I ..\vssrc -I ..\EventQueue -I ..\Libraries\ILI9341 -I ..\Libraries\ili9488 -I ..\USB_DEVICE\App -I ..\USB_DEVICE\Target -I ..\Middlewares\ST\STM32_USB_Device_Library -I ..\Middlewares\ST\STM32_USB_Device_Library\Class\CDC\Inc -I ..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc -I ..\Middlewares\ST\STM32_USB_Device_Library\Class\CDC\Src -I ..\Middlewares\ST\STM32_USB_Device_Library\Core\Src  
+-I.\RTE\_STM32F4-DISCO
+-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.7.0\CMSIS\Core\Include
+-IC:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include
+-D__UVISION_VERSION="534" -D_RTE_ -DSTM32F429xx -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F429xx -DUSE_STM32F4_DISCO -DUSE_FULL_LL_DRIVER -DHW_VER_512KB -DSTM32F4 -DHW_VER_22 -DDBG_TST_X
+-o "..\objects\module stat 11x24 32b.o" --omf_browse "..\objects\module stat 11x24 32b.crf" --depend "..\objects\module stat 11x24 32b.d" "..\Libraries\ILI9341\Module Stat 11x24 32b.c"

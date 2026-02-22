@@ -1,0 +1,37 @@
+ATTENTION!!!: Order of declared variable is VERY IMPORTANT. Can work strange only if some variable are comment and would not fit anymore (for example variable of 1 byte near other variabiles). It may be other reaosn...
+ATTENTION!!! When external variabiles are used to have same declaration. If one is uint8_t and one uint32_t it may consider uint8_t and did not work as it should
+
+
+Beep on module when it uses Start time 
+
+To check when arming to see modules sent ping onwith the delay... not it seems to respond faster (module 1 with 10, 2 and 12 and so on in the same time)
+Stop ping when delete... wait until ping is end it for deleting
+Progress during delete modules it is not currect... always at 0%
+When Wireless setup/custom display does not show corect what it is... it shows custom when is standard and veceversa
+
+
+
+- IT FREEZES IN PLAY IF THE USB WAS DISCONNECTED - I did not encounter this issue
+
+- To switch off volume before 100ms music stops Audiobox/Controller
+
+TIMEZone... to display time with time zone when is used GPS time
+
+
+
+22.09.2022
+- Refresh modules to also refresh Aduioboxes
+- When use delete script does not display corectly mdoule which does not respond
+- Cancel or skip upload does not work as it should. When cancel upload script or does not respond the screen does not show updated status... it display the old status with cancel or skip still on screen
+
+
+RESOLVED
+19.09.2022
+
+- Small and FTQ16x64 module did not corect display status of the wireless (C, S, E)... it changes random between C and E
+To modify variable which keeps the standard network in number... not to be calculated every time. Also save if it is standard or custom, network address in teh flash... load and display information based on that
+
+18.09.2022
+Refresh modules does not work corect - need to remove some more details about connnected modules //RESOLVED
+Audiobox arming - it report it is ok even was closed beforer arm
+
