@@ -816,18 +816,24 @@ uint8_t get_mod_stat_sleep(uint8_t mot_modss){
 void getMS_433_Event(void)
 {
 if(Can_be_Slave == 0) return;
-        
+
+        /* Guard: validate minimum message length before accessing fixed indices.
+         * Message accesses indices up to MSG_LOST_POS (61), so need at least 62 bytes. */
+        extern uint8_t Bytes_433_rcvd;
+        if(Bytes_433_rcvd < 3) return;  /* Need at least header + cmd + address */
+
         if (device_datas.isMaster) {
-                
+
                  device_datas.isWireless433Connected = 1;
                  if(rasb_433DataBuffer[0] == START_CHAR_433MHZ_AB){// received sync from Audiobox
-                        
+
+                                if(Bytes_433_rcvd < 8) return;  /* Need indices 0-7 for sync message */
                                 if((rasb_433DataBuffer[1] == M433_PING_AB_SYNC) && (rasb_433DataBuffer[2] == M433_BROADCAST)){
 
                                         uint32_t new_device_timeX = (rasb_433DataBuffer[7] << 24) | (rasb_433DataBuffer[6] << 16) | (rasb_433DataBuffer[5] << 8) | (rasb_433DataBuffer[4] << 0);
                                         syncMSTimer433X(new_device_timeX);
                                 }
-                             
+
                 }
                 else if(rasb_433DataBuffer[0] == START_CHAR_433MHZ_SM){
                         tmp_adre_received = rasb_433DataBuffer[2];
@@ -846,13 +852,16 @@ if(Can_be_Slave == 0) return;
                         }
 
                         if(rasb_433DataBuffer[1] == M433_PING_1_REPLY){ //received status 1 of a module
-                                
+
+                                        /* Guard: PING_1_REPLY accesses up to index 61 (MSG_LOST_POS) */
+                                        if(Bytes_433_rcvd < (MSG_LOST_POS + 1)) return;
+
                                         //set_Last_ping_433_time(tmp_adre_received);//set ping time
                                         //update_ping_times();
                                        // Set_Ping_TimeX_received(tmp_adre_received);
-                                
-                                        
-                                 
+
+
+
                                         current_BroadcastSlave =  tmp_adre_received;
                                         setSlavePingedX(tmp_adre_received);
                                         Set_Ping_TimeX(tmp_adre_received);

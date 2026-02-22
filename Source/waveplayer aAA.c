@@ -455,7 +455,8 @@ uint8_t wave_player_dump_wave_header(char *filename)
 void wave_player_change_file(char *filename)
 {
    // printf("wave_player_change_file: '%s'\r\n", filename);
-    strcpy(wavefilename, filename);
+    strncpy(wavefilename, filename, sizeof(wavefilename) - 1);
+    wavefilename[sizeof(wavefilename) - 1] = '\0';
 }
 
 void wave_player_init(char* filename)
@@ -463,7 +464,8 @@ void wave_player_init(char* filename)
    // printf("wave_player_init: ->STATE_WAVE_PLAYER_IDLE\r\n");
 //    state_wave_player = STATE_WAVE_PLAYER_INIT;
     state_wave_player = STATE_WAVE_PLAYER_IDLE;
-    strcpy(wavefilename, filename);
+    strncpy(wavefilename, filename, sizeof(wavefilename) - 1);
+    wavefilename[sizeof(wavefilename) - 1] = '\0';
 }
 
 uint32_t get_bytes_per_pcm_frame(uint16_t bitsPerSample, uint16_t channels, uint16_t blockAlign)

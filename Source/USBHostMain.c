@@ -61,7 +61,7 @@ uint8_t was_state_up = 0;
 uint32_t Seq_Firs_Time[MAX_SEQ] = {0};
 
 
-char seq_txts[24] = {0};
+char seq_txts[32] = {0};  /* Was 24 — too small for "XX SEQUENCE XX     R1+16" (27 chars + null) */
 extern uint8_t Current_Seq;
 uint8_t Current_Seq_D = 1;
 //uint8_t Current_Seq_D_tmpX = 0;
@@ -1685,42 +1685,42 @@ uint8_t fill_nextSeqName(uint8_t pos_disp){
         else{
                 
                 memset(seq_txts, 0x00, sizeof(seq_txts));
-                sprintf(seq_txts, "%d%d ", Current_Seq_D_tmp / 10, Current_Seq_D_tmp % 10);
+                snprintf(seq_txts, sizeof(seq_txts), "%d%d ", Current_Seq_D_tmp / 10, Current_Seq_D_tmp % 10);
 
-                
+
                 if(savedDatas.Seq_Name[Current_Seq_D_tmp][0] == 0){
                         memset(buffer, 0x00, sizeof(buffer));
-                        
-                        sprintf(buffer, "SEQUENCE %d%d    ", Current_Seq_D_tmp / 10, Current_Seq_D_tmp % 10);
-                        strcat(seq_txts, buffer);
+
+                        snprintf(buffer, sizeof(buffer), "SEQUENCE %d%d    ", Current_Seq_D_tmp / 10, Current_Seq_D_tmp % 10);
+                        strncat(seq_txts, buffer, sizeof(seq_txts) - strlen(seq_txts) - 1);
                 }
                 else{
-                        for(int i = MIN_SEQ_START_NAME; i < MIN_SEQ_START_NAME + MAX_SEQ_NAME; i++){
-                                
+                        for(int i = MIN_SEQ_START_NAME; i < MIN_SEQ_START_NAME + MAX_SEQ_NAME && i < (int)(sizeof(seq_txts) - 1); i++){
+
                                 seq_txts[i] = (savedDatas.Seq_Name[Current_Seq_D_tmp][i - MIN_SEQ_START_NAME]);
                                 if(seq_txts[i] == 0){
                                         seq_txts[i] = ' ';
                                 }
                         }
                 }
-                
+
                 memset(buffer, 0x00, sizeof(buffer));
                 uint8_t tmp_press_b = Current_Seq_D_tmp % 16;
                 if(tmp_press_b == 0){
                         tmp_press_b = 16;
                 }
                 uint8_t tmp_press_b2 = 0;
-                
+
                 if(Current_Seq_D_tmp > 0){
                         tmp_press_b2 = (Current_Seq_D_tmp -1) / 16;
                 }
                 else{
                         tmp_press_b2 = (Current_Seq_D_tmp) / 16;
                 }
-                
-                
-                sprintf(buffer, " R%d+%d%d", tmp_press_b2 + 1, tmp_press_b/10, tmp_press_b%10);
-                strcat(seq_txts, buffer);
+
+
+                snprintf(buffer, sizeof(buffer), " R%d+%d%d", tmp_press_b2 + 1, tmp_press_b/10, tmp_press_b%10);
+                strncat(seq_txts, buffer, sizeof(seq_txts) - strlen(seq_txts) - 1);
         }
         
         return savedDatas.time_prog.seq_valid[Current_Seq_D_tmp];

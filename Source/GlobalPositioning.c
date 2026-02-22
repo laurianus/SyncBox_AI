@@ -328,8 +328,12 @@ static void parseData(void)
         //if (strcmp(rasb_GpsTokenizedData[0u], "$GPRMC") == 0)
         if (strcmp(rasb_GpsTokenizedData[0u], "$GNRMC") == 0 || strcmp(rasb_GpsTokenizedData[0u], "$GPRMC") == 0)
         {
-		//if ((uint8_t)rasb_GpsTokenizedData[1u][0u] != 0x00u)
-                
+                /* Guard: GNRMC/GPRMC needs at least 13 tokens (indices 0-12) */
+                if(rs_GpsFlags.numberOfTokens < 13u) return;
+
+                /* Guard: token[1] must have at least 10 chars for hhmmss.sss */
+                if(strlen(rasb_GpsTokenizedData[1u]) < 10u) return;
+
                 /* Recommended Minimum Navigation Information */
                 /* extract the UTC time */
                 uint16_t tmp_h;
@@ -358,9 +362,9 @@ static void parseData(void)
                 
                 msg_gps_timer = (uint32_t)GetCurrentSystemTime();
                 
-                if ((uint8_t)rasb_GpsTokenizedData[9u][0u] != 0x00u)
+                if ((uint8_t)rasb_GpsTokenizedData[9u][0u] != 0x00u && strlen(rasb_GpsTokenizedData[9u]) >= 6u)
                 {
-                        
+
                         rs_GpsData.gpsGlobalDateTime.day = ((uint8_t)rasb_GpsTokenizedData[9u][0u] - 0x30u) * 10u + ((uint8_t)rasb_GpsTokenizedData[9u][1u] - 0x30u);
                         rs_GpsData.gpsGlobalDateTime.month = ((uint8_t)rasb_GpsTokenizedData[9u][2u] - 0x30u) * 10u + ((uint8_t)rasb_GpsTokenizedData[9u][3u] - 0x30u);
                         rs_GpsData.gpsGlobalDateTime.year = ((uint8_t)rasb_GpsTokenizedData[9u][4u] - 0x30u) * 10u + ((uint8_t)rasb_GpsTokenizedData[9u][5u] - 0x30u);

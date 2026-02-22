@@ -2581,12 +2581,19 @@ static void sendStringMessageToGPS(const char *message, uint32_t messageSize){
         const char textEnd[]={(char)0x0D, (char)0x0A};
 	memset(outgps, 0x00, sizeof(outgps));
 
-		/* copy to buffer */
-		strcpy(outgps, message);
+		/* Guard: clamp messageSize to fit buffer with room for textEnd + null */
+		if(messageSize > sizeof(outgps) - sizeof(textEnd) - 1){
+			messageSize = sizeof(outgps) - sizeof(textEnd) - 1;
+		}
+		/* copy to buffer (bounded) */
+		memcpy(outgps, message, messageSize);
+		outgps[messageSize] = '\0';
 		/* append line end */
-		strcat(outgps,textEnd);		
+		outgps[messageSize]   = textEnd[0];
+		outgps[messageSize+1] = textEnd[1];
+		outgps[messageSize+2] = '\0';
 
-                HAL_UART_Transmit_IT(&huart3, (uint8_t *)outgps, sizeof(outgps));
+                HAL_UART_Transmit_IT(&huart3, (uint8_t *)outgps, messageSize + 2);
 
 }
 

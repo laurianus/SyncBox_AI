@@ -90,8 +90,8 @@ char Network_Name[6] = {0};
 
 //uint8_t audio_boxes_con = 0;
 
-char tmp_CMD_PAN[24] = {0};
-char tmp_CMD_EPAN[24] = {0};
+char tmp_CMD_PAN[32] = {0};  /* "ATS02=" (6) + up to 16 hex chars + null = 23 max, 32 with margin */
+char tmp_CMD_EPAN[32] = {0}; /* "ATS03=" (6) + up to 16 hex chars + null = 23 max, 32 with margin */
 
 //uint16_t is_msg_snt_dbg = 0;
 
@@ -390,14 +390,17 @@ static int32_t sendStringMessageToWireless(const char *message, uint32_t message
       memset(out, 0x00, sizeof(out));
       
       if(messageSize<=(MAX_WIRELESS_MESSAGE_SIZE-sizeof(textEnd))){
-              
+
            t_span_wir = GetCurrentSystemTime();
 
-              
-            /* copy to buffer */
-            strcpy(out, message);
+
+            /* copy to buffer (bounded) */
+            memcpy(out, message, messageSize);
+            out[messageSize] = '\0';
             /* append line end */
-            strcat(out,textEnd);		
+            out[messageSize]   = textEnd[0];
+            out[messageSize+1] = textEnd[1];
+            out[messageSize+2] = '\0';		
             // wirelessState=WIRELESS_IDLE;
             
 
@@ -460,6 +463,10 @@ static int32_t sendMessageToWireless(WirelessMessageCode msgCode, uint64_t devic
                                                         strncat(outputM, tempBuf, sizeof(outputM) - strlen(outputM) - 1);
                                                         memset(tempBuf, 0x00, sizeof(tempBuf));
 
+                                                        /* Guard: clamp messageSize to fit rasb_TxMessageBuffer (256 bytes, need +1 for '0') */
+                                                        if(messageSize > sizeof(rasb_TxMessageBuffer) - 1){
+                                                            messageSize = sizeof(rasb_TxMessageBuffer) - 1;
+                                                        }
                                                         /* Copy the input message to the transmit buffer. */
                                                         memcpy(&rasb_TxMessageBuffer[0u], message, messageSize);
                                                         /* Add a leading 0 - hex value 0x30 */
@@ -485,6 +492,10 @@ static int32_t sendMessageToWireless(WirelessMessageCode msgCode, uint64_t devic
                                                         /* Add multicast data message header. */
                                                         strncat(outputM, "AT+BCAST:00,", sizeof(outputM) - strlen(outputM) - 1);
                                                         memset(tempBuf, 0x00, sizeof(tempBuf));
+                                                        /* Guard: clamp messageSize to fit rasb_TxMessageBuffer */
+                                                        if(messageSize > sizeof(rasb_TxMessageBuffer) - 1){
+                                                            messageSize = sizeof(rasb_TxMessageBuffer) - 1;
+                                                        }
                                                         /* Copy the input message to the transmit buffer. */
                                                         memcpy(&rasb_TxMessageBuffer[0u], message, messageSize);
                                                         /* Add a leading 0 - hex value 0x30 */
@@ -1175,13 +1186,18 @@ static void decodeDataMessage(char *message[], uint32_t parameterCount){
 @brief Split incoming message into rows
 *********************************************************************/
 static uint32_t processMsg(const uint8_t *incomingMsg, uint32_t msgLength, char *result[]){
-      static char bufMsg[MAX_WIRELESS_MESSAGE_SIZE]={0};	
+      static char bufMsg[MAX_WIRELESS_MESSAGE_SIZE]={0};
       uint32_t counter=0;
       uint32_t length=0;
       char *tempVal;
-      
+
+      /* Guard: reject messages that exceed buffer size */
+      if(msgLength == 0 || msgLength > MAX_WIRELESS_MESSAGE_SIZE){
+            return 0;
+      }
+
       memset(bufMsg, 0x00, sizeof(bufMsg));
-      
+
       memcpy(bufMsg, incomingMsg, msgLength);
       if(bufMsg[msgLength-1]==(uint8_t)0x0A && bufMsg[msgLength-2]==(uint8_t)0x0D){
             bufMsg[msgLength-2]='\0';
@@ -1902,12 +1918,18 @@ static void Sending(void)
          
         //t_spanF = GetCurrentSystemTime();
         message = &(wirelessBuffer.buffer[wirelessBuffer.rdIdx]);
-        buf[0] = (message->dataLength)+3;
+
+        /* Guard: clamp dataLength to prevent buf[40] overflow (need 3 header + data + 1 checksum) */
+        uint8_t safeDataLen = message->dataLength;
+        if(safeDataLen > MAX_MSG_SIZE) safeDataLen = MAX_MSG_SIZE;
+        if(safeDataLen > sizeof(buf) - 4) safeDataLen = sizeof(buf) - 4; /* 3 header + 1 checksum */
+
+        buf[0] = safeDataLen + 3;
         localAddressBuffer = message->address;
         buf[1] = (uint8_t)(localAddressBuffer >> 8);
         buf[2] = (uint8_t)localAddressBuffer;
-        memcpy(buf+3, message->data, message->dataLength);
-        
+        memcpy(buf+3, message->data, safeDataLen);
+
         checksum=calculateXorChecksum(buf, buf[0]);
         buf[buf[0]]=(uint8_t)checksum;
         
@@ -2073,89 +2095,89 @@ void config_PAN_EPAN(uint8_t network_set)
         char tmp_PAN[24];
         char tmp_EPAN[24];
 
-        
+
         uint16_t coordinatorAddressXA = 0;
-        
-        
+
+
         memset(tmp_PAN, 0x00, sizeof(tmp_PAN));
         memset(tmp_EPAN, 0x00, sizeof(tmp_EPAN));
         memset(tmp_CMD_PAN, 0x00, sizeof(tmp_CMD_PAN));
         memset(tmp_CMD_EPAN, 0x00, sizeof(tmp_CMD_EPAN));
-        
-        sprintf(tmp_CMD_PAN, "ATS02=");
-        sprintf(tmp_CMD_EPAN, "ATS03=");
+
+        snprintf(tmp_CMD_PAN, sizeof(tmp_CMD_PAN), "ATS02=");
+        snprintf(tmp_CMD_EPAN, sizeof(tmp_CMD_EPAN), "ATS03=");
         
         if (network_set == 1) // change only EPAN
         {
                 
-                sprintf(tmp_PAN, "%s", "AAAA");
-                strcat(tmp_CMD_PAN, tmp_PAN);
-                
+                snprintf(tmp_PAN, sizeof(tmp_PAN), "%s", "AAAA");
+                strncat(tmp_CMD_PAN, tmp_PAN, sizeof(tmp_CMD_PAN) - strlen(tmp_CMD_PAN) - 1);
+
                 if(get_device_datas()->isMaster == 1 && get_device_datas()->join_status == 0)
                 {
-                        sprintf(tmp_EPAN, "%016llX", coordinatorAddressX);
-                        strcat(tmp_CMD_EPAN, tmp_EPAN);
-                        
+                        snprintf(tmp_EPAN, sizeof(tmp_EPAN), "%016llX", coordinatorAddressX);
+                        strncat(tmp_CMD_EPAN, tmp_EPAN, sizeof(tmp_CMD_EPAN) - strlen(tmp_CMD_EPAN) - 1);
+
                         //save_custom_Wir(coordinatorAddressX);
                 }
                 else if (get_device_datas()->isMaster == 0 && get_device_datas()->join_status == 1)
                 {
-                        sprintf(tmp_EPAN, "%016llX", coordinatorAddress);
-                        strcat(tmp_CMD_EPAN, tmp_EPAN);
-                        
+                        snprintf(tmp_EPAN, sizeof(tmp_EPAN), "%016llX", coordinatorAddress);
+                        strncat(tmp_CMD_EPAN, tmp_EPAN, sizeof(tmp_CMD_EPAN) - strlen(tmp_CMD_EPAN) - 1);
+
                         //save_custom_Wir(coordinatorAddress);
                 }
                 else
                 {
-                        sprintf(tmp_EPAN, "%s", "12345678AAFFDD00");
-                        strcat(tmp_CMD_EPAN, tmp_EPAN);
+                        snprintf(tmp_EPAN, sizeof(tmp_EPAN), "%s", "12345678AAFFDD00");
+                        strncat(tmp_CMD_EPAN, tmp_EPAN, sizeof(tmp_CMD_EPAN) - strlen(tmp_CMD_EPAN) - 1);
                         //save_custom_Wir(0);
                 }
-                
-                
-        } 
+
+
+        }
         else if (network_set == 2)// change EPAN and PAN
         {
-                
-                
-                
+
+
+
                 if(get_device_datas()->isMaster == 1 && get_device_datas()->join_status == 0)
                 {
                         coordinatorAddressXA = (uint16_t)(coordinatorAddressX);
-                        
-                        sprintf(tmp_PAN, "%04X", coordinatorAddressXA);
-                        strcat(tmp_CMD_PAN, tmp_PAN);
-                        
-                        sprintf(tmp_EPAN, "%016llX", coordinatorAddressX);
-                        strcat(tmp_CMD_EPAN, tmp_EPAN);
-                        
+
+                        snprintf(tmp_PAN, sizeof(tmp_PAN), "%04X", coordinatorAddressXA);
+                        strncat(tmp_CMD_PAN, tmp_PAN, sizeof(tmp_CMD_PAN) - strlen(tmp_CMD_PAN) - 1);
+
+                        snprintf(tmp_EPAN, sizeof(tmp_EPAN), "%016llX", coordinatorAddressX);
+                        strncat(tmp_CMD_EPAN, tmp_EPAN, sizeof(tmp_CMD_EPAN) - strlen(tmp_CMD_EPAN) - 1);
+
                      //   save_custom_Wir(coordinatorAddressXA);
                 }
                 else if (get_device_datas()->isMaster == 0 && get_device_datas()->join_status == 1)
                 {
                         coordinatorAddressXA = (uint16_t)(coordinatorAddress);
-                        
-                        sprintf(tmp_PAN, "%04X", coordinatorAddressXA);
-                        strcat(tmp_CMD_PAN, tmp_PAN);
-                        
-                        sprintf(tmp_EPAN, "%016llX", coordinatorAddress);
-                        strcat(tmp_CMD_EPAN, tmp_EPAN);
-                        
+
+                        snprintf(tmp_PAN, sizeof(tmp_PAN), "%04X", coordinatorAddressXA);
+                        strncat(tmp_CMD_PAN, tmp_PAN, sizeof(tmp_CMD_PAN) - strlen(tmp_CMD_PAN) - 1);
+
+                        snprintf(tmp_EPAN, sizeof(tmp_EPAN), "%016llX", coordinatorAddress);
+                        strncat(tmp_CMD_EPAN, tmp_EPAN, sizeof(tmp_CMD_EPAN) - strlen(tmp_CMD_EPAN) - 1);
+
                         //save_custom_Wir(coordinatorAddressXA);
                 }
                 else
                 {
-                        
-                        
-                        sprintf(tmp_PAN, "%s", "AAAA");
-                        strcat(tmp_CMD_PAN, tmp_PAN);
-                        
-                        sprintf(tmp_EPAN, "%s", "12345678AAFFDD00");
-                        strcat(tmp_CMD_EPAN, tmp_EPAN);
-                        
+
+
+                        snprintf(tmp_PAN, sizeof(tmp_PAN), "%s", "AAAA");
+                        strncat(tmp_CMD_PAN, tmp_PAN, sizeof(tmp_CMD_PAN) - strlen(tmp_CMD_PAN) - 1);
+
+                        snprintf(tmp_EPAN, sizeof(tmp_EPAN), "%s", "12345678AAFFDD00");
+                        strncat(tmp_CMD_EPAN, tmp_EPAN, sizeof(tmp_CMD_EPAN) - strlen(tmp_CMD_EPAN) - 1);
+
 //                        save_custom_Wir(0);
                 }
-                
+
         }
         else if (network_set == 3)// change New EPAN and PAN
         {
@@ -2163,37 +2185,42 @@ void config_PAN_EPAN(uint8_t network_set)
                 {
                         //coordinatorAddressXA = (uint16_t)(coordinatorAddress);
 
-                        sprintf(tmp_PAN, "%s", wir_network_rem_name);
-                        strcat(tmp_CMD_PAN, tmp_PAN);
-                        
-                        sprintf(tmp_EPAN, "%s", "12345678AAFF");
-                        strcat(tmp_CMD_EPAN, tmp_EPAN);
-                        
+                        /* Guard: ensure wir_network_rem_name is null-terminated (it's only 4 bytes) */
+                        char safe_net_name[5] = {0};
+                        memcpy(safe_net_name, wir_network_rem_name, sizeof(wir_network_rem_name));
+                        safe_net_name[4] = '\0';
+
+                        snprintf(tmp_PAN, sizeof(tmp_PAN), "%s", safe_net_name);
+                        strncat(tmp_CMD_PAN, tmp_PAN, sizeof(tmp_CMD_PAN) - strlen(tmp_CMD_PAN) - 1);
+
+                        snprintf(tmp_EPAN, sizeof(tmp_EPAN), "%s", "12345678AAFF");
+                        strncat(tmp_CMD_EPAN, tmp_EPAN, sizeof(tmp_CMD_EPAN) - strlen(tmp_CMD_EPAN) - 1);
+
                         memset(tmp_EPAN, 0x00, sizeof(tmp_EPAN));
-                        
-                        sprintf(tmp_EPAN, "%s", wir_network_rem_name);
-                        strcat(tmp_CMD_EPAN, tmp_EPAN);
+
+                        snprintf(tmp_EPAN, sizeof(tmp_EPAN), "%s", safe_net_name);
+                        strncat(tmp_CMD_EPAN, tmp_EPAN, sizeof(tmp_CMD_EPAN) - strlen(tmp_CMD_EPAN) - 1);
                         
                 }
                 else
                 {
-                        
-                        sprintf(tmp_PAN, "%s", "AAAA");
-                        strcat(tmp_CMD_PAN, tmp_PAN);
-                        
-                        sprintf(tmp_EPAN, "%s", "12345678AAFFDD00");
-                        strcat(tmp_CMD_EPAN, tmp_EPAN);
-                        
+
+                        snprintf(tmp_PAN, sizeof(tmp_PAN), "%s", "AAAA");
+                        strncat(tmp_CMD_PAN, tmp_PAN, sizeof(tmp_CMD_PAN) - strlen(tmp_CMD_PAN) - 1);
+
+                        snprintf(tmp_EPAN, sizeof(tmp_EPAN), "%s", "12345678AAFFDD00");
+                        strncat(tmp_CMD_EPAN, tmp_EPAN, sizeof(tmp_CMD_EPAN) - strlen(tmp_CMD_EPAN) - 1);
+
                 }
-                
+
         }
         else // Default PAN and EPAN
         {
-                sprintf(tmp_PAN, "%s", "AAAA");
-                strcat(tmp_CMD_PAN, tmp_PAN);
-                
-                sprintf(tmp_EPAN, "%s", "12345678AAFFDD00");
-                strcat(tmp_CMD_EPAN, tmp_EPAN);
+                snprintf(tmp_PAN, sizeof(tmp_PAN), "%s", "AAAA");
+                strncat(tmp_CMD_PAN, tmp_PAN, sizeof(tmp_CMD_PAN) - strlen(tmp_CMD_PAN) - 1);
+
+                snprintf(tmp_EPAN, sizeof(tmp_EPAN), "%s", "12345678AAFFDD00");
+                strncat(tmp_CMD_EPAN, tmp_EPAN, sizeof(tmp_CMD_EPAN) - strlen(tmp_CMD_EPAN) - 1);
                 
            //     save_custom_Wir(0);
         }
@@ -2878,22 +2905,22 @@ void config_PAN_EPAN_new(void){
         memset(tmp_EPAN, 0x00, sizeof(tmp_EPAN));
         memset(tmp_CMD_PAN, 0x00, sizeof(tmp_CMD_PAN));
 
-        sprintf(tmp_CMD_PAN, "ATS02=");
-        sprintf(tmp_CMD_EPAN, "ATS03=");
-        
+        snprintf(tmp_CMD_PAN, sizeof(tmp_CMD_PAN), "ATS02=");
+        snprintf(tmp_CMD_EPAN, sizeof(tmp_CMD_EPAN), "ATS03=");
+
 
         if(get_is_custom() == 0){
-                sprintf(tmp_PAN, "%s", "AAAA");
-                sprintf(tmp_EPAN, "%s", "12345678AAFFDD00");
-        
+                snprintf(tmp_PAN, sizeof(tmp_PAN), "%s", "AAAA");
+                snprintf(tmp_EPAN, sizeof(tmp_EPAN), "%s", "12345678AAFFDD00");
+
         }else{
-                sprintf(tmp_PAN, "%04X", get_433_net_key());
-                sprintf(tmp_EPAN, "12345678AA%04X%02X", get_433_net_key(), get_433_net_id());
+                snprintf(tmp_PAN, sizeof(tmp_PAN), "%04X", get_433_net_key());
+                snprintf(tmp_EPAN, sizeof(tmp_EPAN), "12345678AA%04X%02X", get_433_net_key(), get_433_net_id());
                 
         }
         
-                strcat(tmp_CMD_PAN, tmp_PAN);
-                strcat(tmp_CMD_EPAN, tmp_EPAN);
+                strncat(tmp_CMD_PAN, tmp_PAN, sizeof(tmp_CMD_PAN) - strlen(tmp_CMD_PAN) - 1);
+                strncat(tmp_CMD_EPAN, tmp_EPAN, sizeof(tmp_CMD_EPAN) - strlen(tmp_CMD_EPAN) - 1);
 
         sendStringMessageToWireless(cfgDisconnect, (uint32_t)strlen(cfgDisconnect));
         t_spanaaaa = GetCurrentSystemTime();

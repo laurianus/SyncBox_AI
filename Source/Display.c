@@ -285,8 +285,8 @@ uint16_t Long_refresh = 0;
 extern uint16_t Temp_Hum_refresh;
 
 char tempText[24] = {0};
-char tempTextU[21] = {0};
-char bufferDisp[21] = {0};
+char tempTextU[24] = {0};  /* Was 21 — too small for worst-case strcat chain (22 chars needed) */
+char bufferDisp[24] = {0};
 
 uint16_t is_blinkTimer_TC = 0;
 
@@ -1886,52 +1886,35 @@ void Updates_Player_Stat2(void)
                                       {
                                         //if(get_AB_Adre() != MAX_AB_ID){
                                           if(1){
-                                              sprintf(tempTextU, "<<");
-                                              
+                                              snprintf(tempTextU, sizeof(tempTextU), "<<");
+
                                               if(PPS_Mp3_AB == 1 || PPS_Mp3_AB == 2 || PPS_Mp3_AB == 3)
                                               {
-                                                      memset(bufferDisp, 0x00, sizeof(bufferDisp));
-                                                      sprintf(bufferDisp, "%s", "\xFE\xFA");
-                                                      strcat(tempTextU, bufferDisp);
+                                                      strncat(tempTextU, "\xFE\xFA", sizeof(tempTextU) - strlen(tempTextU) - 1);
                                               }
                                               else
                                               {
-                                                      memset(bufferDisp, 0x00, sizeof(bufferDisp));
-                                                      sprintf(bufferDisp, "%s", "  ");
-                                                      strcat(tempTextU, bufferDisp);
+                                                      strncat(tempTextU, "  ", sizeof(tempTextU) - strlen(tempTextU) - 1);
                                               }
-                                             
-                                      
-                                      
-                                              memset(bufferDisp, 0x00, sizeof(bufferDisp));
-                                              sprintf(bufferDisp, "%s", " Short Press ");
-                                              strcat(tempTextU, bufferDisp);
-                                              
 
-                                              
+
+                                              strncat(tempTextU, " Short Press ", sizeof(tempTextU) - strlen(tempTextU) - 1);
+
+
                                               if(PPS_Mp3_AB ==  2 || PPS_Mp3_AB == 3)
                                               {
-                                                      memset(bufferDisp, 0x00, sizeof(bufferDisp));
-                                                      sprintf(bufferDisp, "%s", "\xF8\xF9");
-                                                      strcat(tempTextU, bufferDisp);
+                                                      strncat(tempTextU, "\xF8\xF9", sizeof(tempTextU) - strlen(tempTextU) - 1);
                                               }
                                               else if(PPS_Mp3_AB == 1)
                                               {
-                                                      memset(bufferDisp, 0x00, sizeof(bufferDisp));
-                                                      sprintf(bufferDisp, "%s", "\xF7\xF6");
-                                                      strcat(tempTextU, bufferDisp);
-
+                                                      strncat(tempTextU, "\xF7\xF6", sizeof(tempTextU) - strlen(tempTextU) - 1);
                                               }
                                               else
                                               {
-                                                      memset(bufferDisp, 0x00, sizeof(bufferDisp));
-                                                      sprintf(bufferDisp, "%s", "  ");
-                                                      strcat(tempTextU, bufferDisp);
+                                                      strncat(tempTextU, "  ", sizeof(tempTextU) - strlen(tempTextU) - 1);
                                               }
-                                              
-                                              memset(bufferDisp, 0x00, sizeof(bufferDisp));
-                                              sprintf(bufferDisp, "%s", ">>");
-                                              strcat(tempTextU, bufferDisp);
+
+                                              strncat(tempTextU, ">>", sizeof(tempTextU) - strlen(tempTextU) - 1);
                                         }
                               }
 
@@ -1960,7 +1943,7 @@ void Updates_Player_Stat2(void)
                                                                               sprintf(tempText, "Volume:");
                                                                               memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                                                               sprintf(bufferDisp, "%d", main_volume);
-                                                                              strcat(tempText, bufferDisp);
+                                                                              strncat(tempText, bufferDisp, sizeof(tempText) - strlen(tempText) - 1);
                                                                       }
                                                              }
                                                              else
@@ -2026,11 +2009,11 @@ void Updates_Player_Stat2(void)
                                               sprintf(tempText, "<<V-  Volume:");
                                               memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                               sprintf(bufferDisp, "%d", main_volume);
-                                              strcat(tempText, bufferDisp);
+                                              strncat(tempText, bufferDisp, sizeof(tempText) - strlen(tempText) - 1);
                                               
                                               memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                               sprintf(bufferDisp, "%s", "  V+>>");
-                                              strcat(tempText, bufferDisp);
+                                              strncat(tempText, bufferDisp, sizeof(tempText) - strlen(tempText) - 1);
                                       }
                              }else{
                                      if(device_Status == Status_Idle){
@@ -2098,62 +2081,62 @@ void Updates_Player_Stat1(void)
                                          sprintf(bufferDisp, "%s", " ");
                                    }                                
                                   
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                                   
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   
                                   sprintf(bufferDisp, "%d", hor);
-                                  strcat(tempTextU, bufferDisp);            
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);            
                                   
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));                                    
                                   sprintf(bufferDisp, "%s", ":");    
-                                  strcat(tempTextU, bufferDisp);                                       
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                       
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));                                                                        
                             }
                            else
                             {
                                   sprintf(bufferDisp, "%s", "  ");    
-                                  strcat(tempTextU, bufferDisp);                                       
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                       
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));                                                                   
                                   
                             }
                            if(min < 10)
                             {
                                   sprintf(bufferDisp, "%s", "0");
-                                  strcat(tempTextU, bufferDisp);                                        
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                        
                             }
                            
                            
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            
                            sprintf(bufferDisp, "%d", min);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                            
                            if(sec < 10)
                             {
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   sprintf(bufferDisp, "%s", ":0");
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             }
                            else
                             {
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   sprintf(bufferDisp, "%s", ":");
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             }
                            
                            
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%d", sec);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%s", ".");
-                           strcat(tempTextU, bufferDisp); 
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1); 
                             
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%d", milsec);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             
                     }
         
@@ -2210,23 +2193,23 @@ void Updates_Player_StatTime(void)
                                          sprintf(bufferDisp, "%s", " ");
                                    }                                
                                   
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                                   
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   
                                   sprintf(bufferDisp, "%d", hor);
-                                  strcat(tempTextU, bufferDisp);            
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);            
                                   
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));                                    
                                   sprintf(bufferDisp, "%s", ":");    
-                                  strcat(tempTextU, bufferDisp);                                       
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                       
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));                                                                        
                             }
                            else
                             {
                                     /*
                                   sprintf(bufferDisp, "%s", "  ");    
-                                  strcat(tempTextU, bufferDisp);                                       
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                       
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));                                                                   
                                     */
                                   
@@ -2235,52 +2218,52 @@ void Updates_Player_StatTime(void)
                            if(min < 10)
                             {
                                   sprintf(bufferDisp, "%s", "0");
-                                  strcat(tempTextU, bufferDisp);                                        
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                        
                             }
                            
                            
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            
                            sprintf(bufferDisp, "%d", min);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                            
                            if(sec < 10)
                             {
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   sprintf(bufferDisp, "%s", ":0");
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             }
                            else
                             {
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   sprintf(bufferDisp, "%s", ":");
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             }
                            
                            
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%d", sec);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%s", ".");
-                           strcat(tempTextU, bufferDisp); 
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1); 
                             
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%d", milsec);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             
                             if(hor == 0)
                             {
                                 memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                 sprintf(bufferDisp, "%s", "  < >  ");
-                                strcat(tempTextU, bufferDisp);
+                                strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             }
                             else
                             {
                                 memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                 sprintf(bufferDisp, "%s", "<  >");
-                                strcat(tempTextU, bufferDisp);
+                                strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             
                             }
                             
@@ -2301,40 +2284,40 @@ void Updates_Player_StatTime(void)
                            if(min < 10)
                             {
                                   sprintf(bufferDisp, "%s", "0");
-                                  strcat(tempTextU, bufferDisp);                                        
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                        
                             }
                            
                            
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            
                            sprintf(bufferDisp, "%d", min);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                            
                            if(sec < 10)
                             {
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   sprintf(bufferDisp, "%s", ":0");
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             }
                            else
                             {
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   sprintf(bufferDisp, "%s", ":");
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             }
                            
                            
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%d", sec);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%s", ".");
-                           strcat(tempTextU, bufferDisp); 
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1); 
                             
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%d", milsec);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             
                             
                      writeTextToFrameBuffer(0, 4, tempTextU, (uint32_t)strlen(tempTextU));       
@@ -2438,62 +2421,62 @@ void Updates_Player_Stat3(void)
                                          sprintf(bufferDisp, "%s", " ");
                                    }                                
                                   
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                                   
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   
                                   sprintf(bufferDisp, "%d", hor);
-                                  strcat(tempTextU, bufferDisp);            
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);            
                                   
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));                                    
                                   sprintf(bufferDisp, "%s", ":");    
-                                  strcat(tempTextU, bufferDisp);                                       
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                       
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));                                                                        
                             }
                            else
                             {
                                   sprintf(bufferDisp, "%s", "  ");    
-                                  strcat(tempTextU, bufferDisp);                                       
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                       
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));                                                                   
                                   
                             }
                            if(min < 10)
                             {
                                   sprintf(bufferDisp, "%s", "0");
-                                  strcat(tempTextU, bufferDisp);                                        
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                        
                             }
                            
                            
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            
                            sprintf(bufferDisp, "%d", min);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                            
                            if(sec < 10)
                             {
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   sprintf(bufferDisp, "%s", ":0");
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             }
                            else
                             {
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   sprintf(bufferDisp, "%s", ":");
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             }
                            
                            
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%d", sec);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%s", ".");
-                           strcat(tempTextU, bufferDisp); 
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1); 
                             
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%d", milsec);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             
                     }
         
@@ -2549,7 +2532,7 @@ void Updates_Player_Stat3(void)
            if(countLastTime1 > 0)
            {
                         sprintf(tempTextU, "FILE READ ERROR:%d", countLastTime1);   
-                        strcat(tempTextU, bufferDisp);
+                        strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
            }
            else
            {
@@ -2589,7 +2572,7 @@ void Updates_Player_Stat3(void)
            if(countLastTime1 > 0)
            {
                         sprintf(tempTextU, "FILE READ ERROR:%d", countLastTime1);   
-                        strcat(tempTextU, bufferDisp);
+                        strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
            }
            else
            {
@@ -2682,7 +2665,7 @@ void Updates_Player_Stat3(void)
                                       }
                }
                         
-                        strcat(tempTextU, bufferDisp);
+                        strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
       }
 
 
@@ -2722,17 +2705,17 @@ void Updates_Player_Stat3(void)
               if (isGPSTimerValid != 0){
                       if(isGPSFTValid == 0){
                                 sprintf(bufferDisp, " CTC %02d:%02d:%02d R", UhoursSMPTE, UminutesSMPTE, USecSMPTE);
-                                strcat(tempTextU, bufferDisp);
+                                strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                       }
                       else if(isGPSFTValid == 1){
                                 sprintf(bufferDisp, " TUS %02d:%02d:%02d R", UhoursSMPTE, UminutesSMPTE, USecSMPTE);
-                                strcat(tempTextU, bufferDisp);
+                                strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                       }
               }
               else if (isGPSTimerValid == 0){
                       if(isGPSFTValid == 1){
                                 sprintf(bufferDisp, " TTS %02d:%02d:%02d R", UhoursSMPTE, UminutesSMPTE, USecSMPTE);
-                                strcat(tempTextU, bufferDisp);
+                                strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                       }
               }         
          
@@ -2759,23 +2742,23 @@ void Updates_Player_Stat3(void)
                                          sprintf(bufferDisp, "%s", " ");
                                    }                                
                                   
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                                   
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   
                                   sprintf(bufferDisp, "%d", hor);
-                                  strcat(tempTextU, bufferDisp);            
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);            
                                   
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));                                    
                                   sprintf(bufferDisp, "%s", ":");    
-                                  strcat(tempTextU, bufferDisp);                                       
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                       
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));                                                                        
                             }
                            else
                             {
                                     /*
                                   sprintf(bufferDisp, "%s", "  ");    
-                                  strcat(tempTextU, bufferDisp);                                       
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                       
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));       
 */                                    
                                   
@@ -2783,52 +2766,52 @@ void Updates_Player_Stat3(void)
                            if(min < 10)
                             {
                                   sprintf(bufferDisp, "%s", "0");
-                                  strcat(tempTextU, bufferDisp);                                        
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                        
                             }
                            
                            
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            
                            sprintf(bufferDisp, "%d", min);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                            
                            if(sec < 10)
                             {
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   sprintf(bufferDisp, "%s", ":0");
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             }
                            else
                             {
                                   memset(bufferDisp, 0x00, sizeof(bufferDisp));
                                   sprintf(bufferDisp, "%s", ":");
-                                  strcat(tempTextU, bufferDisp);
+                                  strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             }
                            
                            
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%d", sec);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                             
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%s", ".");
-                           strcat(tempTextU, bufferDisp); 
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1); 
                             
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%d", milsec);
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
  
 if(PPS_Mp3_AB == 1 || PPS_Mp3_AB == 3)
 {                            
                         
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%s", " PLAY");
-                           strcat(tempTextU, bufferDisp); 
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1); 
                            
         /*
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, " %d", sync_times);
-                           strcat(tempTextU, bufferDisp); 
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1); 
 */
                         
                            test_xxx_AB++;
@@ -2841,13 +2824,13 @@ if(PPS_Mp3_AB == 1 || PPS_Mp3_AB == 3)
                                    
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, " %d", drift_AB_T);
-                           strcat(tempTextU, bufferDisp); 
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1); 
 }
 else
 {         
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%s", "    PLAY");
-                           strcat(tempTextU, bufferDisp); 
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1); 
 }
 
                             
@@ -2871,23 +2854,23 @@ else
                                   sprintf(bufferDisp, "%s", " ");
                             }                                
                            
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                            
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            
                            sprintf(bufferDisp, "%d", hor);
-                           strcat(tempTextU, bufferDisp);            
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);            
                            
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));                                    
                            sprintf(bufferDisp, "%s", ":");    
-                           strcat(tempTextU, bufferDisp);                                       
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                       
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));                                                                        
                      }
                     else
                      {
                              /*
                            sprintf(bufferDisp, "%s", "  ");    
-                           strcat(tempTextU, bufferDisp);                                       
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                       
                            memset(bufferDisp, 0x00, sizeof(bufferDisp)); 
 */                             
                            
@@ -2895,43 +2878,43 @@ else
                     if(min < 10)
                      {
                            sprintf(bufferDisp, "%s", "0");
-                           strcat(tempTextU, bufferDisp);                                        
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);                                        
                      }
                     
                     
                     memset(bufferDisp, 0x00, sizeof(bufferDisp));
                     
                     sprintf(bufferDisp, "%d", min);
-                    strcat(tempTextU, bufferDisp);
+                    strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                     
                     if(sec < 10)
                      {
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%s", ":0");
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                      }
                     else
                      {
                            memset(bufferDisp, 0x00, sizeof(bufferDisp));
                            sprintf(bufferDisp, "%s", ":");
-                           strcat(tempTextU, bufferDisp);
+                           strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                      }
                     
                     memset(bufferDisp, 0x00, sizeof(bufferDisp));
                     sprintf(bufferDisp, "%d", sec);
-                    strcat(tempTextU, bufferDisp);
+                    strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                      
                     memset(bufferDisp, 0x00, sizeof(bufferDisp));
                     sprintf(bufferDisp, "%s", ".");
-                    strcat(tempTextU, bufferDisp); 
+                    strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1); 
                             
                     memset(bufferDisp, 0x00, sizeof(bufferDisp));
                     sprintf(bufferDisp, "%d", milsec);
-                    strcat(tempTextU, bufferDisp);
+                    strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1);
                      
                     memset(bufferDisp, 0x00, sizeof(bufferDisp));
                     sprintf(bufferDisp, "%s", "    PAUSE");
-                    strcat(tempTextU, bufferDisp); 
+                    strncat(tempTextU, bufferDisp, sizeof(tempTextU) - strlen(tempTextU) - 1); 
              
              write_2lines(2);
              break;
@@ -4176,7 +4159,7 @@ void set_display_TimeStart_choose(void){
                         Time_Blink_timer = 0;
                }
              
-                strcat(tempTextU, bufferDispX);
+                strncat(tempTextU, bufferDispX, sizeof(tempTextU) - strlen(tempTextU) - 1);
                
                
                 buf_xxx = get_center((uint8_t)strlen(tempTextU));
